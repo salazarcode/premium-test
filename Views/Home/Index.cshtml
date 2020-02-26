@@ -30,13 +30,13 @@
             </tr>
             <tr>
                 <td><label for="age">Age:</label></td>
-                <td><input type="text" id="age" value="" /></td>
+                <td><input type="number" id="age" value="" min="1" max="150"/></td>
             </tr>
         </table>
         <br />
 
         <button onclick="getValue()">GetValue</button>
-        <input type="text" id="res" value="" />
+        <input type="text" id="res" value="" disabled/>
         <br />
         <hr />
         <br />
@@ -44,7 +44,7 @@
             <tr>
                 <td>Frecuency</td>
                 <td>
-                    <select id="frecuency" style="width:100%" onchange="calculatePayments()">
+                    <select id="frecuency" style="width:100%" onchange="calculatePayments()" disabled>
                         <option value="0">Monthly</option>
                         <option value="1">Quarterly</option>
                         <option value="2">SemiAnnual</option>
@@ -54,11 +54,11 @@
             </tr>
             <tr>
                 <td>Annual</td>
-                <td><input type="text" id="annual" value="" /></td>
+                <td><input type="text" id="annual" value="" disabled/></td>
             </tr>
             <tr>
                 <td>Monthly</td>
-                <td><input type="text" id="monthly" value="" /></td>
+                <td><input type="text" id="monthly" value="" disabled/></td>
             </tr>
         </table>
     </div>
@@ -73,16 +73,14 @@
                 state: document.querySelector("#state").value,
                 age: document.querySelector("#age").value
             })).then(res => res.json())
-                .then(res => {
-                    window.ammount = res.premium;
-                    document.querySelector("#res").value = window.ammount;
-                })
-                .then(res => {
-                    calculatePayments();
-                });
-
-
-
+            .then(res => {
+                window.ammount = res.premium;
+                document.querySelector("#res").value = window.ammount;
+            })
+            .then(res => {
+                calculatePayments();
+                document.querySelector("#frecuency").disabled = false;
+            });
         }
 
         function validations() {
