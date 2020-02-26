@@ -1,8 +1,145 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Premium Calculator";
+    Layout = null;
 }
+    <style>
+        .formTable {
+            width:40%;
+            border:solid 1px silver
+        }
+    </style>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+    <div class="text-center">
+        <h1 class="display-4">Premium Calculator</h1>
+
+        <table class="formTable">
+            <tr>
+                <td><label for="dateOfBirth">Date of Birth:</label></td>
+                <td><input type="date" id="dateOfBirth" value="" /></td>
+            </tr>
+            <tr>
+                <td><label for="state">State:</label></td>
+                <td>
+                    <select id="state">
+                        <option value="NY">NY</option>
+                        <option value="AL">AL</option>
+                        <option value="AK">AK</option>
+                        <option value="*">Other</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><label for="age">Age:</label></td>
+                <td><input type="text" id="age" value="" /></td>
+            </tr>
+        </table>
+        <br />
+
+        <button onclick="getValue()">GetValue</button>
+        <input type="text" id="res" value="" />
+        <br />
+        <hr />
+        <br />
+        <table>
+            <tr>
+                <td>Frecuency</td>
+                <td>
+                    <select id="frecuency" style="width:100%" onchange="calculatePayments()">
+                        <option value="0">Monthly</option>
+                        <option value="1">Quarterly</option>
+                        <option value="2">SemiAnnual</option>
+                        <option value="3">Annualy</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Annual</td>
+                <td><input type="text" id="annual" value="" /></td>
+            </tr>
+            <tr>
+                <td>Monthly</td>
+                <td><input type="text" id="monthly" value="" /></td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        async function getValue() {
+            if (!validations())
+                return;
+                
+            var res = await fetch(buildSafeUrl("/Home/Premium", {
+                dateOfBirth: document.querySelector("#dateOfBirth").value,
+                state: document.querySelector("#state").value,
+                age: document.querySelector("#age").value
+            })).then(res => res.json())
+                .then(res => {
+                    window.ammount = res.premium;
+                    document.querySelector("#res").value = window.ammount;
+                })
+                .then(res => {
+                    calculatePayments();
+                });
+
+
+
+        }
+
+        function validations() {
+            if (document.querySelector("#dateOfBirth").value == "") { 
+                alert("You must define a Date of Birth");
+                document.querySelector("#dateOfBirth").focus();
+                return false;
+            }
+            if (document.querySelector("#age").value == "") { 
+                alert("You must define an age");
+                document.querySelector("#age").focus();
+                return false;
+            }
+            return true;
+        }
+
+        function calculatePayments() {
+            if (window.ammount == undefined) {
+                alert("You must query for a premium ammount first");
+                return;
+            }
+            switch (document.querySelector("#frecuency").value) {
+                case "0":
+                    document.querySelector("#annual").value = (window.ammount * 12).toFixed(2);
+                    document.querySelector("#monthly").value = (window.ammount).toFixed(2);
+                    break;
+                case "1": //quarterly
+                    document.querySelector("#annual").value = (window.ammount * 4).toFixed(2);
+                    document.querySelector("#monthly").value = (window.ammount / 3).toFixed(2);
+                    break;
+                case "2": //semi-annual
+                    document.querySelector("#annual").value = (window.ammount * 2).toFixed(2);
+                    document.querySelector("#monthly").value = (window.ammount / 6).toFixed(2);
+                    break;
+                case "3": //annual
+                    document.querySelector("#annual").value = (window.ammount * 1).toFixed(2);
+                    document.querySelector("#monthly").value = (window.ammount / 12).toFixed(2);
+                    break;
+            }
+        }
+
+        function buildSafeUrl(url, parameters) {
+            let qs = "";
+            for (const key in parameters) {
+                if (parameters.hasOwnProperty(key)) {
+                    const value = parameters[key];
+                    qs += encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";
+                }
+            }
+            if (qs.length > 0) {
+                qs = qs.substring(0, qs.length - 1);
+                url = url + "?" + qs;
+            }
+
+            return url;
+        }
+
+    </script>
+
+
